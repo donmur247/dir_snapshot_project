@@ -64,6 +64,15 @@ class SnapshotDB:
         """
         return len(self.snapshot_dirs)
 
+    @property
+    def is_empty(self) -> bool:
+        """Check if database is empty.
+
+        Returns:
+            bool: True if database is empty.
+        """
+        return self.num_dirs == 0
+
     def _load_data(self) -> SnapshotListData:
         """Load snapshot data from database file.
 
@@ -89,6 +98,16 @@ class SnapshotDB:
         """
         return dir in [d.path for d in self.snapshot_dirs]
 
+    def _get_last_id(self) -> int:
+        """Get last directory id.
+
+        Returns:
+            int: Last directory id.
+        """
+        if self.is_empty:
+            return 0
+        return max([d.id for d in self.snapshot_dirs]) + 1
+
     def save_data(self) -> bool:
         """Save snapshot data to database file.
 
@@ -112,7 +131,7 @@ class SnapshotDB:
             bool: True if directory was added.
         """
         if not self._is_dir_in_db(dir):
-            dir_data = SnapshotDirData(id=self.num_dirs, path=dir, snap_files=[])
+            dir_data = SnapshotDirData(id=self._get_last_id(), path=dir, snap_files=[])
             self._snapshot_data.dirs.append(dir_data)
             return True
         return False
