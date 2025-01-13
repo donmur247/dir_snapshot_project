@@ -2,10 +2,9 @@
 
 import json
 from dataclasses import dataclass, asdict
-from pathlib import Path
 from typing import Optional
 
-from dir_snapshot.util import get_db_file
+from dir_snapshot.util import delete_files, get_db_file
 
 
 @dataclass
@@ -121,6 +120,17 @@ class SnapshotDB:
             return False
         return True
 
+    def get_snapshot_dir(self, id: int) -> Optional[SnapshotDirData]:
+        """Get snapshot directory by id.
+
+        Args:
+            id (int): Directory id.
+
+        Returns:
+            Optional[SnapshotDirData]: Snapshot Dir Data model.
+        """
+        return next((d for d in self.snapshot_dirs if d.id == id), None)
+
     def add_snapshot_dir(self, dir: str) -> bool:
         """Add snapshot directory to database.
 
@@ -136,13 +146,31 @@ class SnapshotDB:
             return True
         return False
 
-    def get_snapshot_dir(self, id: int) -> Optional[SnapshotDirData]:
-        """Get snapshot directory by id.
+    def update_snapshot_dir(self, id: int, snap_file: str) -> None:
+        """Update snapshot dir with new snapshot file.
 
         Args:
-            id (int): Directory id.
+            id (int): Snapshot dir id.
+            snap_file (str): Snapshot file.
+
+        """
+        for idx, d in enumerate(self.snapshot_dirs):
+            if d.id == id:
+                self._snapshot_data.dirs[idx].snap_files.append(snap_file)
+                break
+
+    def delete_snapshot_dir(self, id: int) -> bool:
+        """Delete snapshot directory from database.
+
+        Args:
+            id (int): Snapshot dir id.
 
         Returns:
-            Optional[SnapshotDirData]: Snapshot Dir Data model.
+            bool: True if its deleted.
         """
-        return next((d for d in self.snapshot_dirs if d.id == id), None)
+        for idx, d in enumerate(self.snapshot_dirs):
+            if d.id == id:
+                self._snapshot_data.dirs.pop(idx)
+                return delete_files(d.snap_files)
+
+        return False

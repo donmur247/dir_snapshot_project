@@ -80,3 +80,20 @@ def get_db_file() -> Optional[Path]:
     db_file = get_settings_dir() / APP_DB_FILE
     create_file(db_file)
     return db_file
+
+
+def delete_files(files: list[str]) -> bool:
+    """Delete files safely.
+
+    Args:
+        files (list[str]): List of file paths.
+
+    Returns:
+        bool: True if all files were deleted successfully.
+    """
+    for file in files:
+        try:
+            Path(file).unlink()
+        except OSError:
+            return False
+    return True
