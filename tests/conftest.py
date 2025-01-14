@@ -5,6 +5,7 @@ from pathlib import Path
 import pytest
 
 from dir_snapshot.db import SnapshotDB
+from dir_snapshot.snapshot import SnapshotData
 
 
 @pytest.fixture
@@ -49,3 +50,27 @@ def snapshot_db(empty_dirs_db):
     db.add_snapshot_dir("C:/temp2")
     db.add_snapshot_dir("C:/temp3")
     return db
+
+
+@pytest.fixture
+def snapshots():
+    """Fixture for list of snapshots."""
+    snap1 = SnapshotData(
+        dirs=["some_test"],
+        files=[
+            "test1 - Copy (2).txt",
+            "test1 - Copy.txt",
+            "test1.txt",
+            "some_test/test1 - Copy.txt",
+        ],
+    )
+    snap2 = SnapshotData(
+        dirs=["some_test", "new_test"],
+        files=[
+            "test1 - Copy (2).txt",
+            "some_test/test1 - Copy.txt",
+            "new_test/test1.txt",
+            "some_test/test2.txt",
+        ],
+    )
+    return [snap1, snap2]
