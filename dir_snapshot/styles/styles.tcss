@@ -1,0 +1,10 @@
+Screen {
+    layout: grid;
+    grid-size: 2 2;
+    grid-columns: 1fr 2fr;
+    grid-rows: 35% 65%;
+}
+
+#list-of-dirs {
+    column-span: 2;
+}

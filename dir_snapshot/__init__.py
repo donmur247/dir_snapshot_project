@@ -8,3 +8,7 @@ APP_SETTINGS_DIR = ".dir_snapshot"
 APP_SNAPSHOT_DIR = "snapshots"
 APP_DB_FILE = "dir_snapshot.json"
 APP_SNAPSHOT_EXT = ".snp"
+
+# UI constants
+APP_TITLE = "Directory Snapshot App"
+APP_SUBTITLE = __version__
