@@ -1,8 +1,9 @@
 """User interface module for custom widgets."""
 
 from textual.app import ComposeResult
+from textual.containers import Vertical
 from textual.widget import Widget
-from textual.widgets import Placeholder
+from textual.widgets import Button, OptionList, Placeholder, Static
 
 
 class DirListWidget(Widget):
@@ -14,19 +15,47 @@ class DirListWidget(Widget):
         height: 100%;
         layout: grid;
         grid-size: 2 2;
-        grid-rows: 10% 90%;
+        grid-rows: 8% 92%;
         grid-columns: 2fr 1fr;
+    }
+
+    OptionList {
+        height: 100%;
+    }
+
+    Button {
+        margin: 1;
     }
 
     #title {
         column-span: 2;
+        content-align: center middle;
+        background: darkslategrey;
+    }
+
+    .button-container {
+        align: center middle;
+        background: rgb(30, 30, 30);
+        padding: 1;
     }
     """
 
     def compose(self) -> ComposeResult:
-        yield Placeholder("List of Directories - TITLE", id="title")
-        yield Placeholder("List of Directories - CONTENT")
-        yield Placeholder("List of Directories - SIDEBAR")
+        yield Static("List of Directories", id="title")
+        yield OptionList(
+            "C:/temp",
+            "C:/Program Files/Python310/Scripts",
+            "C:/Program Files (x86)/Common Files/Microsoft Shared/Office16",
+            "C:/Program Files (x86)/Common Files/Microsoft Shared/Office16/COM",
+        )
+        with Vertical(classes="button-container"):
+            yield Button("Add Directory", variant="primary")
+            yield Button("Remove Directory", variant="error")
+
+    def on_mount(self) -> None:
+        option_list = self.query_one(OptionList)
+        option_list.styles.border = "none"
+        option_list.styles.height = "1fr"
 
 
 class SnapshotListWidget(Widget):
