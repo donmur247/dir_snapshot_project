@@ -3,7 +3,13 @@
 from textual.app import ComposeResult
 from textual.containers import Vertical
 from textual.widget import Widget
-from textual.widgets import Button, OptionList, Placeholder, Static
+from textual.widgets import (
+    Button,
+    OptionList,
+    Placeholder,
+    SelectionList,
+    Static,
+)
 
 
 class DirListWidget(Widget):
@@ -69,19 +75,37 @@ class SnapshotListWidget(Widget):
 
     #title {
         dock: top;
-        height: 2;
+        height: 1;
+        content-align: center middle;
+        background: darkslategrey;
     }
 
-    #button {
+    .button {
+        content-align: center middle;
         dock: bottom;
-        height: 4;
+        height: 3;
+        text-align: center;
+        color: goldenrod;
     }
     """
 
     def compose(self) -> ComposeResult:
-        yield Placeholder("List of Snapshots - TITLE", id="title")
-        yield Placeholder("List of Snapshots - CONTENT", id="content")
-        yield Placeholder("List of Snapshots - BUTTON", id="button")
+        yield Static("Snapshots", id="title")
+        yield SelectionList(
+            ("Snapshot 1", 0, True),
+            ("Snapshot 2", 1),
+            ("Snapshot 3", 2),
+            ("Snapshot 4", 3),
+            ("Snapshot 5", 4),
+        )
+        yield Button("Compare Snapshots", classes="button")
+
+    def on_mount(self) -> None:
+        selection_list = self.query_one(SelectionList)
+        selection_list.styles.border = "none"
+        selection_list.styles.height = "1fr"
+        button = self.query_one(Button)
+        button.styles.width = "100%"
 
 
 class ContentWidget(Widget):
