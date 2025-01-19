@@ -12,7 +12,7 @@ from textual.widgets import (
 )
 
 from dir_snapshot import APP_TITLE, APP_SUBTITLE, TCSS_DIR
-from dir_snapshot.ui import QuitDialog
+from dir_snapshot.ui import AddDirDialog, QuitDialog
 
 
 # TODO: Temporary content. Remove them once we got dynamic content.
@@ -60,7 +60,10 @@ class DirSnapshotApp(App):
     CSS_PATH = (TCSS_DIR / "app_styles.tcss").as_posix()
     TITLE = APP_TITLE
     SUB_TITLE = APP_SUBTITLE
-    BINDINGS = [("q", "request_quit", "Quit")]
+    BINDINGS = [
+        ("q", "request_quit", "Quit"),
+        ("a", "add_dir", "Add Directory"),
+    ]
 
     def compose(self) -> ComposeResult:
         yield Header()
@@ -93,3 +96,15 @@ class DirSnapshotApp(App):
     def action_request_quit(self) -> None:
         """Action to show quit dialog."""
         self.push_screen(QuitDialog())
+
+    def action_add_dir(self) -> None:
+        """Action to show add directory dialog."""
+
+        def check_input_dir(path: str | None) -> None:
+            """Check path returned from input dialog."""
+            if path:
+                self.notify(path)
+            else:
+                self.notify("Cancelled")
+
+        self.push_screen(AddDirDialog(), check_input_dir)
