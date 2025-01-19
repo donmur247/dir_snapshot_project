@@ -5,10 +5,13 @@ from textual.containers import Vertical
 from textual.widget import Widget
 from textual.widgets import (
     Button,
+    Markdown,
     OptionList,
     Placeholder,
     SelectionList,
     Static,
+    TabbedContent,
+    TabPane,
 )
 
 
@@ -108,6 +111,44 @@ class SnapshotListWidget(Widget):
         button.styles.width = "100%"
 
 
+# TODO: Temporary content. Remove them once we got dynamic content.
+COMPARISON_CONTENT = """
+# Comparison Result for Snapshot 1 and Snapshot 2
+
+## Added Directories
+- Directory 1
+- Directory 2
+
+## Added Files
+- File 1
+- File 2
+
+## Removed Directories
+- Directory 3
+- Directory 4
+
+## Removed Files
+- File 3
+- File 4
+"""
+
+HELP_CONTENT = """
+# Directory Snapshot Help
+
+## Getting Started
+The top area is for the list of directories. The bottom area is for the list of snapshots.
+
+## Adding a Directory
+Click the 'Add Directory' button to add a directory to the list.
+
+## Removing a Directory
+Click the 'Remove Directory' button to remove a directory from the list.
+
+## Comparing Snapshots
+Click the 'Compare Snapshots' button to compare the selected snapshots.
+"""
+
+
 class ContentWidget(Widget):
     """Content widget."""
 
@@ -119,10 +160,20 @@ class ContentWidget(Widget):
 
     #title {
         dock: top;
-        height: 2;
+        height: 1;
+        content-align: center middle;
+        background: purple;
     }
     """
 
     def compose(self) -> ComposeResult:
-        yield Placeholder("Content Widget - TITLE", id="title")
-        yield Placeholder("Content Widget - CONTENT")
+        yield Static("Comparison & Help", id="title")
+        with TabbedContent(initial="snapshot-result"):
+            with TabPane("Snapshot Results", id="snapshot-result"):
+                yield Markdown(COMPARISON_CONTENT, id="result-content")
+            with TabPane("Help", id="help"):
+                yield Markdown(HELP_CONTENT, id="help-content")
+
+    def on_mount(self) -> None:
+        self.query_one("#result-content").styles.height = "1fr"
+        self.query_one("#help-content").styles.height = "1fr"
