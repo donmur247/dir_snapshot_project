@@ -14,6 +14,7 @@ class DirSnapshotApp(App):
     CSS_PATH = (Path(__file__).parent / "styles" / "styles.tcss").as_posix()
     TITLE = APP_TITLE
     SUB_TITLE = APP_SUBTITLE
+    BINDINGS = [("q", "quit", "Quit")]
 
     def compose(self) -> ComposeResult:
         yield Header()
