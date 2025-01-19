@@ -12,6 +12,7 @@ from textual.widgets import (
 )
 
 from dir_snapshot import APP_TITLE, APP_SUBTITLE, TCSS_DIR
+from dir_snapshot.ui import QuitDialog
 
 
 # TODO: Temporary content. Remove them once we got dynamic content.
@@ -59,7 +60,7 @@ class DirSnapshotApp(App):
     CSS_PATH = (TCSS_DIR / "app_styles.tcss").as_posix()
     TITLE = APP_TITLE
     SUB_TITLE = APP_SUBTITLE
-    BINDINGS = [("q", "quit", "Quit")]
+    BINDINGS = [("q", "request_quit", "Quit")]
 
     def compose(self) -> ComposeResult:
         yield Header()
@@ -88,3 +89,7 @@ class DirSnapshotApp(App):
         self.query_one("#help-content").styles.height = "1fr"
         self.query_one(OptionList).border_title = "Directories"
         self.query_one(SelectionList).border_title = "Snapshots"
+
+    def action_request_quit(self) -> None:
+        """Action to show quit dialog."""
+        self.push_screen(QuitDialog())
