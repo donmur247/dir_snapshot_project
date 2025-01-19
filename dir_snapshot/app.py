@@ -1,24 +1,23 @@
 """Application module for Directory Snapshot App."""
 
-from pathlib import Path
-
 from textual.app import App, ComposeResult
-from textual.widgets import Footer, Header, Placeholder
+from textual.widgets import Footer, Header
 
-from dir_snapshot import APP_TITLE, APP_SUBTITLE
+from dir_snapshot import APP_TITLE, APP_SUBTITLE, TCSS_DIR
+from dir_snapshot.ui import ContentWidget, DirListWidget, SnapshotListWidget
 
 
 class DirSnapshotApp(App):
     """Main Directory Snapshot App class."""
 
-    CSS_PATH = (Path(__file__).parent / "styles" / "styles.tcss").as_posix()
+    CSS_PATH = (TCSS_DIR / "app_styles.tcss").as_posix()
     TITLE = APP_TITLE
     SUB_TITLE = APP_SUBTITLE
     BINDINGS = [("q", "quit", "Quit")]
 
     def compose(self) -> ComposeResult:
         yield Header()
-        yield Placeholder("List of Directories Widget", id="list-of-dirs")
-        yield Placeholder("List of Snapshots Widget")
-        yield Placeholder("Display Screen Widget")
+        yield DirListWidget(id="list-of-dirs")
+        yield SnapshotListWidget()
+        yield ContentWidget()
         yield Footer()
