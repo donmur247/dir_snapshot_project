@@ -1,5 +1,6 @@
 """Application module for Directory Snapshot App."""
 
+from textual import on
 from textual.app import App, ComposeResult
 from textual.widgets import (
     Footer,
@@ -64,6 +65,7 @@ class DirSnapshotApp(App):
         ("q", "request_quit", "Quit"),
         ("a", "add_dir", "Add Directory"),
         ("r", "remove_dir", "Remove Directory"),
+        ("c", "compare_snapshots", "Compare Snapshots"),
     ]
 
     def compose(self) -> ComposeResult:
@@ -80,6 +82,7 @@ class DirSnapshotApp(App):
             ("Snapshot 3", 2),
             ("Snapshot 4", 3),
             ("Snapshot 5", 4),
+            id="snapshots",
         )
         with TabbedContent(initial="snapshot-result", id="content"):
             with TabPane("Snapshot Results", id="snapshot-result"):
@@ -127,3 +130,14 @@ class DirSnapshotApp(App):
         self.push_screen(
             ConfirmDialog("Are you sure you want to remove?"), check_confirm_remove
         )
+
+    def action_compare_snapshots(self) -> None:
+        """Action to show compare snapshots dialog."""
+        self.notify("Compare Snapshots")
+
+    @on(SelectionList.SelectionToggled, "#snapshots")
+    def update_selected_snapshots(self, event: SelectionList.SelectionToggled) -> None:
+        """Update selected snapshots to limit selection to 2."""
+        snapshot_list = self.query_one(SelectionList)
+        if len(snapshot_list.selected) > 2:
+            snapshot_list.toggle(event.selection_index)
