@@ -12,7 +12,7 @@ from textual.widgets import (
 )
 
 from dir_snapshot import APP_TITLE, APP_SUBTITLE, TCSS_DIR
-from dir_snapshot.ui import AddDirDialog, QuitDialog
+from dir_snapshot.ui import AddDirDialog, ConfirmDialog
 
 
 # TODO: Temporary content. Remove them once we got dynamic content.
@@ -63,6 +63,7 @@ class DirSnapshotApp(App):
     BINDINGS = [
         ("q", "request_quit", "Quit"),
         ("a", "add_dir", "Add Directory"),
+        ("r", "remove_dir", "Remove Directory"),
     ]
 
     def compose(self) -> ComposeResult:
@@ -95,7 +96,12 @@ class DirSnapshotApp(App):
 
     def action_request_quit(self) -> None:
         """Action to show quit dialog."""
-        self.push_screen(QuitDialog())
+
+        def check_quit(quit: bool) -> None:
+            if quit:
+                self.exit()
+
+        self.push_screen(ConfirmDialog("Are you sure you want to quit?"), check_quit)
 
     def action_add_dir(self) -> None:
         """Action to show add directory dialog."""
@@ -108,3 +114,16 @@ class DirSnapshotApp(App):
                 self.notify("Cancelled")
 
         self.push_screen(AddDirDialog(), check_input_dir)
+
+    def action_remove_dir(self) -> None:
+        """Action to show remove directory dialog."""
+
+        def check_confirm_remove(remove: bool) -> None:
+            if remove:
+                self.notify("Removed")
+            else:
+                self.notify("Cancelled")
+
+        self.push_screen(
+            ConfirmDialog("Are you sure you want to remove?"), check_confirm_remove
+        )

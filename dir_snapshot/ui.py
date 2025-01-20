@@ -6,11 +6,11 @@ from textual.screen import ModalScreen
 from textual.widgets import Button, Input, Label
 
 
-class QuitDialog(ModalScreen):
+class ConfirmDialog(ModalScreen[bool]):
     """Quit dialog screen."""
 
     DEFAULT_CSS = """
-    QuitDialog {
+    ConfirmDialog {
         align: center middle;
     }
 
@@ -37,19 +37,23 @@ class QuitDialog(ModalScreen):
     }
     """
 
+    def __init__(self, question: str):
+        super().__init__()
+        self.question = question
+
     def compose(self) -> ComposeResult:
         yield Grid(
-            Label("Are you sure you want to quit?", id="question"),
-            Button("Quit", variant="error", id="quit"),
-            Button("Cancel", variant="primary", id="cancel"),
+            Label(self.question, id="question"),
+            Button("Yes", variant="primary", id="yes"),
+            Button("No", variant="error", id="no"),
             id="dialog",
         )
 
     def on_button_pressed(self, event: Button.Pressed) -> None:
-        if event.button.id == "quit":
-            self.app.exit()
+        if event.button.id == "yes":
+            self.dismiss(True)
         else:
-            self.app.pop_screen()
+            self.dismiss(False)
 
 
 class AddDirDialog(ModalScreen[str | None]):
