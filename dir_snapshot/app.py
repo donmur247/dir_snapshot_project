@@ -1,5 +1,7 @@
 """Application module for Directory Snapshot App."""
 
+from pathlib import Path
+
 from textual import on
 from textual.app import App, ComposeResult
 from textual.widgets import (
@@ -13,6 +15,7 @@ from textual.widgets import (
 )
 
 from dir_snapshot import APP_TITLE, APP_SUBTITLE, TCSS_DIR
+from dir_snapshot.db import SnapshotDB
 from dir_snapshot.ui import AddDirDialog, ConfirmDialog
 
 MAX_SELECTED = 2
@@ -73,24 +76,12 @@ class DirSnapshotApp(App):
     def __init__(self) -> None:
         super().__init__()
         self.selected_dir: str = ""
+        self.db: SnapshotDB = SnapshotDB()
 
     def compose(self) -> ComposeResult:
         yield Header()
-        yield OptionList(
-            "C:/temp",
-            "C:/Program Files/Python310/Scripts",
-            "C:/Program Files (x86)/Common Files/Microsoft Shared/Office16",
-            "C:/Program Files (x86)/Common Files/Microsoft Shared/Office16/COM",
-            id="dirs",
-        )
-        yield SelectionList(
-            ("Snapshot 1", 0, True),
-            ("Snapshot 2", 1),
-            ("Snapshot 3", 2),
-            ("Snapshot 4", 3),
-            ("Snapshot 5", 4),
-            id="snapshots",
-        )
+        yield OptionList(id="dirs")
+        yield SelectionList(id="snapshots")
         with TabbedContent(initial="snapshot-result", id="content"):
             with TabPane("Snapshot Results", id="snapshot-result"):
                 yield Markdown(COMPARISON_CONTENT, id="result-content")
@@ -103,6 +94,15 @@ class DirSnapshotApp(App):
         self.query_one("#help-content").styles.height = "1fr"
         self.query_one(OptionList).border_title = "Directories"
         self.query_one(SelectionList).border_title = "Snapshots"
+
+        self._populate_data()
+
+    def _populate_data(self) -> None:
+        """Populate data to UI elements."""
+        if self.db.snapshot_dirs:
+            dir_list = self.query_one(OptionList)
+            for dir in self.db.snapshot_dirs:
+                dir_list.add_option(dir.path)
 
     def action_request_quit(self) -> None:
         """Action to show quit dialog."""
@@ -119,9 +119,23 @@ class DirSnapshotApp(App):
         def check_input_dir(path: str | None) -> None:
             """Check path returned from input dialog."""
             if path:
-                self.notify(path)
+                new_dir = Path(path)
+                if new_dir.exists():
+                    if self.db.add_snapshot_dir(new_dir.as_posix()):
+                        self.query_one(OptionList).add_option(new_dir.as_posix())
+                        self.notify(f"Added {new_dir.as_posix()}")
+                    else:
+                        self.notify(
+                            f"{new_dir.as_posix()} already exists in database.",
+                            severity="error",
+                        )
+                else:
+                    self.notify(
+                        f"Directory {new_dir.as_posix()} does not exist.",
+                        severity="error",
+                    )
             else:
-                self.notify("Cancelled")
+                self.notify("Cancelled", severity="error")
 
         self.push_screen(AddDirDialog(), check_input_dir)
 
