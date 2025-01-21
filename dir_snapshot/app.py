@@ -15,6 +15,8 @@ from textual.widgets import (
 from dir_snapshot import APP_TITLE, APP_SUBTITLE, TCSS_DIR
 from dir_snapshot.ui import AddDirDialog, ConfirmDialog
 
+MAX_SELECTED = 2
+
 
 # TODO: Temporary content. Remove them once we got dynamic content.
 COMPARISON_CONTENT = """
@@ -68,6 +70,10 @@ class DirSnapshotApp(App):
         ("c", "compare_snapshots", "Compare Snapshots"),
     ]
 
+    def __init__(self) -> None:
+        super().__init__()
+        self.selected_dir: str = ""
+
     def compose(self) -> ComposeResult:
         yield Header()
         yield OptionList(
@@ -75,6 +81,7 @@ class DirSnapshotApp(App):
             "C:/Program Files/Python310/Scripts",
             "C:/Program Files (x86)/Common Files/Microsoft Shared/Office16",
             "C:/Program Files (x86)/Common Files/Microsoft Shared/Office16/COM",
+            id="dirs",
         )
         yield SelectionList(
             ("Snapshot 1", 0, True),
@@ -133,11 +140,22 @@ class DirSnapshotApp(App):
 
     def action_compare_snapshots(self) -> None:
         """Action to show compare snapshots dialog."""
-        self.notify("Compare Snapshots")
+        snapshot_list = self.query_one(SelectionList)
+        options = [
+            str(snapshot_list.get_option_at_index(snapshot).prompt)
+            for snapshot in snapshot_list.selected
+        ]
+        self.notify(f"{','.join(options)}")
 
     @on(SelectionList.SelectionToggled, "#snapshots")
     def update_selected_snapshots(self, event: SelectionList.SelectionToggled) -> None:
         """Update selected snapshots to limit selection to 2."""
         snapshot_list = self.query_one(SelectionList)
-        if len(snapshot_list.selected) > 2:
+        if len(snapshot_list.selected) > MAX_SELECTED:
             snapshot_list.toggle(event.selection_index)
+
+    @on(OptionList.OptionSelected, "#dirs")
+    def update_selected_dirs(self, event: OptionList.OptionSelected) -> None:
+        """Update selected directory."""
+        self.selected_dir = event.option.prompt
+        self.notify(f"{self.selected_dir}")
