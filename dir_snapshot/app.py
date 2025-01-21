@@ -101,14 +101,15 @@ class DirSnapshotApp(App):
         """Populate data to UI elements."""
         if self.db.snapshot_dirs:
             dir_list = self.query_one(OptionList)
-            for dir in self.db.snapshot_dirs:
-                dir_list.add_option(dir.path)
+            for d in self.db.snapshot_dirs:
+                dir_list.add_option(d.path)
 
     def action_request_quit(self) -> None:
         """Action to show quit dialog."""
 
         def check_quit(quit: bool) -> None:
             if quit:
+                self.db.save_data()
                 self.exit()
 
         self.push_screen(ConfirmDialog("Are you sure you want to quit?"), check_quit)

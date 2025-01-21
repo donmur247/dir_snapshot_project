@@ -81,7 +81,10 @@ class SnapshotDB:
         _snapshot_data = None
         try:
             with self._db_file.open("r") as f:
-                _snapshot_data = SnapshotListData(**json.load(f))
+                _snapshot_data = SnapshotListData(dirs=[])
+                rows = json.load(f).get("dirs")
+                for row in rows:
+                    _snapshot_data.dirs.append(SnapshotDirData(**row))
         except json.JSONDecodeError:
             _snapshot_data = SnapshotListData(dirs=[])
         return _snapshot_data
@@ -130,6 +133,17 @@ class SnapshotDB:
             Optional[SnapshotDirData]: Snapshot Dir Data model.
         """
         return next((d for d in self.snapshot_dirs if d.id == id), None)
+
+    def get_snapshot_dir_by_path(self, path: str) -> Optional[SnapshotDirData]:
+        """Get snapshot directory by path.
+
+        Args:
+            path (str): Full path of directory.
+
+        Returns:
+            Optional[SnapshotDirData]: Snapshot Dir Data model.
+        """
+        return next((d for d in self.snapshot_dirs if d.path == path), None)
 
     def add_snapshot_dir(self, dir: str) -> bool:
         """Add snapshot directory to database.
