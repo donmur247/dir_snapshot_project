@@ -150,9 +150,12 @@ class DirSnapshotApp(App):
             else:
                 self.notify("Cancelled")
 
-        self.push_screen(
-            ConfirmDialog("Are you sure you want to remove?"), check_confirm_remove
-        )
+        if self.selected_dir:
+            self.push_screen(
+                ConfirmDialog(f"Remove {self.selected_dir} ?"), check_confirm_remove
+            )
+        else:
+            self.notify("No directory selected.", severity="error")
 
     def action_take_snapshot(self) -> None:
         """Action to take a snapshot based on selected directory."""
