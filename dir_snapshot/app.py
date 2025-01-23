@@ -70,6 +70,7 @@ class DirSnapshotApp(App):
         ("q", "request_quit", "Quit"),
         ("a", "add_dir", "Add Directory"),
         ("r", "remove_dir", "Remove Directory"),
+        ("s", "take_snapshot", "Take Snapshot"),
         ("c", "compare_snapshots", "Compare Snapshots"),
     ]
 
@@ -152,6 +153,23 @@ class DirSnapshotApp(App):
         self.push_screen(
             ConfirmDialog("Are you sure you want to remove?"), check_confirm_remove
         )
+
+    def action_take_snapshot(self) -> None:
+        """Action to take a snapshot based on selected directory."""
+
+        def check_confirm_snapshot(snapshot: bool) -> None:
+            if snapshot:
+                self.notify("Snapshot")
+            else:
+                self.notify("Cancelled")
+
+        if self.selected_dir:
+            self.push_screen(
+                ConfirmDialog(f"Take snapshot for {self.selected_dir}?"),
+                check_confirm_snapshot,
+            )
+        else:
+            self.notify("No directory selected.", severity="error")
 
     def action_compare_snapshots(self) -> None:
         """Action to show compare snapshots dialog."""
