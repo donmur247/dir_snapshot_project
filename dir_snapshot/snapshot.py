@@ -1,9 +1,12 @@
 """Snapshot module to handle actual directory snapshots."""
 
+import datetime
 import difflib
 import pickle
 from dataclasses import dataclass
 from pathlib import Path
+
+from dir_snapshot.util import get_snapshot_dir
 
 
 @dataclass
@@ -72,6 +75,20 @@ def compare_snapshot(snap1: SnapshotData, snap2: SnapshotData) -> SnapshotCompar
                 snap_compare.removed_files.append(result.strip("-"))
 
     return snap_compare
+
+
+def generate_snp_filename(id: int) -> str:
+    """Generate snapshot filename.
+
+    Args:
+        id (int): Snapshot id.
+
+    Returns:
+        str: Generated filename.
+    """
+    now = datetime.datetime.now()
+    timestamp = now.strftime("%Y%m%d%H%M%S")
+    return (get_snapshot_dir() / f"snapshot-{id}-{timestamp}.snp").as_posix()
 
 
 def write_snp_data(snapshot_data: SnapshotData, file: str) -> bool:
