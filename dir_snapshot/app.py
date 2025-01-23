@@ -16,6 +16,7 @@ from textual.widgets import (
 
 from dir_snapshot import APP_TITLE, APP_SUBTITLE, TCSS_DIR
 from dir_snapshot.db import SnapshotDB
+from dir_snapshot.snapshot import create_snapshot, generate_snp_filename, write_snp_data
 from dir_snapshot.ui import AddDirDialog, ConfirmDialog
 
 MAX_SELECTED = 2
@@ -82,7 +83,7 @@ class DirSnapshotApp(App):
     def compose(self) -> ComposeResult:
         yield Header()
         yield OptionList(id="dirs")
-        yield SelectionList(id="snapshots")
+        yield SelectionList[str](id="snapshots")
         with TabbedContent(initial="snapshot-result", id="content"):
             with TabPane("Snapshot Results", id="snapshot-result"):
                 yield Markdown(COMPARISON_CONTENT, id="result-content")
@@ -104,6 +105,16 @@ class DirSnapshotApp(App):
             dir_list = self.query_one(OptionList)
             for d in self.db.snapshot_dirs:
                 dir_list.add_option(d.path)
+
+    def _refresh_snapshot_list(self) -> None:
+        """Refresh snapshot list widget."""
+        if self.selected_dir:
+            snapshot_list = self.query_one(SelectionList)
+            snapshot_list.clear_options()
+            snapshot_data = self.db.get_snapshot_dir_by_path(self.selected_dir)
+            if snapshot_data.snap_files:
+                for snap_file in snapshot_data.snap_files:
+                    snapshot_list.add_option((snap_file, snap_file))
 
     def action_request_quit(self) -> None:
         """Action to show quit dialog."""
@@ -162,7 +173,19 @@ class DirSnapshotApp(App):
 
         def check_confirm_snapshot(snapshot: bool) -> None:
             if snapshot:
-                self.notify("Snapshot")
+                dir_id = self.db.get_id_by_path(self.selected_dir)
+                if dir_id is not None:
+                    snp_file = generate_snp_filename(dir_id)
+                    snapshot_data = create_snapshot(self.selected_dir)
+                    if write_snp_data(snapshot_data, snp_file):
+                        self.db.update_snapshot_dir(dir_id, Path(snp_file).name)
+                        self._refresh_snapshot_list()
+                        self.notify(f"Created snapshot file: {snp_file}")
+                    else:
+                        self.notify(
+                            f"Failed to create snapshot file: {snp_file}",
+                            severity="error",
+                        )
             else:
                 self.notify("Cancelled")
 
@@ -194,4 +217,4 @@ class DirSnapshotApp(App):
     def update_selected_dirs(self, event: OptionList.OptionSelected) -> None:
         """Update selected directory."""
         self.selected_dir = event.option.prompt
-        self.notify(f"{self.selected_dir}")
+        self._refresh_snapshot_list()

@@ -145,6 +145,17 @@ class SnapshotDB:
         """
         return next((d for d in self.snapshot_dirs if d.path == path), None)
 
+    def get_id_by_path(self, path: str) -> Optional[int]:
+        """Get directory id by path.
+
+        Args:
+            path (str): Full path of directory.
+
+        Returns:
+            Optional[int]: Directory id.
+        """
+        return next((d.id for d in self.snapshot_dirs if d.path == path), None)
+
     def add_snapshot_dir(self, dir: str) -> bool:
         """Add snapshot directory to database.
 
